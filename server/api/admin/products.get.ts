@@ -50,7 +50,8 @@ export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const adminKey = getHeader(event, 'x-admin-key')
   
-  const expectedKey = config.adminKey || process.env.ADMIN_KEY || 'admin123'
+  const expectedKey = process.env.ADMIN_KEY || config.adminKey || 'admin123'
+  console.log('Expected:', expectedKey, 'Got:', adminKey, 'ENV:', process.env.ADMIN_KEY)
   if (adminKey !== expectedKey) {
     throw createError({ statusCode: 401, statusMessage: 'Unauthorized' })
   }
