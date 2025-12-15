@@ -48,7 +48,7 @@ export default defineNuxtConfig({
     kvRestApiToken: process.env.KV_REST_API_TOKEN,
     postgresUrl: process.env.POSTGRES_URL,
     taxjarApiKey: process.env.TAXJAR_API_KEY,
-        adminKey: process.env.ADMIN_KEY || 'admin123',
+    adminKey: process.env.ADMIN_KEY || 'admin123',
 
     // Public keys (client-side accessible)
     public: {
