@@ -3,20 +3,7 @@
  * POST /api/admin/products
  */
 import { setStock } from '../../utils/inventory'
-
-interface Product {
-  id: string
-  slug: string
-  title: string
-  price: number
-  originalPrice?: number
-  images: string[]
-  category: string
-  rating: number
-  reviewCount: number
-  description?: string
-  featured: boolean
-}
+import { upsertProduct, type Product } from '../../utils/products'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -37,23 +24,8 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  // Get existing products from KV
-  const kv = await useStorage('data')
-  let products: Product[] = await kv.getItem('products') || []
-  
-  // Check if updating or creating
-  const existingIndex = products.findIndex(p => p.id === product.id)
-  
-  if (existingIndex >= 0) {
-    // Update existing product
-    products[existingIndex] = { ...products[existingIndex], ...product }
-  } else {
-    // Add new product
-    products.push(product)
-  }
-  
-  // Save products
-  await kv.setItem('products', products)
+  // Upsert product using Vercel KV
+  const isNew = await upsertProduct(product)
   
   // Set stock if provided
   if (stock !== undefined) {
@@ -63,6 +35,6 @@ export default defineEventHandler(async (event) => {
   return {
     success: true,
     product,
-    isNew: existingIndex < 0
+    isNew
   }
 })

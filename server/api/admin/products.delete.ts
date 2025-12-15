@@ -2,20 +2,7 @@
  * Product Management - Delete Product
  * DELETE /api/admin/products
  */
-
-interface Product {
-  id: string
-  slug: string
-  title: string
-  price: number
-  originalPrice?: number
-  images: string[]
-  category: string
-  rating: number
-  reviewCount: number
-  description?: string
-  featured: boolean
-}
+import { deleteProduct } from '../../utils/products'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -33,19 +20,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 400, statusMessage: 'productId is required' })
   }
   
-  // Get existing products
-  const kv = await useStorage('data')
-  let products: Product[] = await kv.getItem('products') || []
+  // Delete product using Vercel KV
+  const deleted = await deleteProduct(productId)
   
-  const initialLength = products.length
-  products = products.filter(p => p.id !== productId)
-  
-  if (products.length === initialLength) {
+  if (!deleted) {
     throw createError({ statusCode: 404, statusMessage: 'Product not found' })
   }
-  
-  // Save products
-  await kv.setItem('products', products)
   
   return {
     success: true,
