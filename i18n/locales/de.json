@@ -1,0 +1,68 @@
+{
+  "common": {
+    "home": "Startseite",
+    "products": "Produkte",
+    "cart": "Warenkorb",
+    "search": "Suche",
+    "language": "Sprache",
+    "store_name": "AMZ Shop"
+  },
+  "home": {
+    "hero_title": "Premium-Produkte zu günstigen Preisen",
+    "hero_subtitle": "Entdecken Sie unsere Auswahl an Top-Amazon-Produkten",
+    "shop_now": "Jetzt Einkaufen",
+    "featured_products": "Ausgewählte Produkte",
+    "quality_title": "Qualität Garantiert",
+    "quality_desc": "Alle Produkte werden sorgfältig ausgewählt und geprüft",
+    "shipping_title": "Schneller Versand",
+    "shipping_desc": "Schnelle Lieferung zu Ihnen nach Hause",
+    "secure_title": "Sichere Zahlung",
+    "secure_desc": "Ihre Zahlungsinformationen sind immer geschützt"
+  },
+  "products_data": {
+    "wireless-earbuds-pro": "Kabellose Ohrhörer Pro",
+    "smart-fitness-watch": "Smart Fitness Uhr"
+  },
+  "product": {
+    "add_to_cart": "In den Warenkorb",
+    "adding": "Wird hinzugefügt...",
+    "in_stock": "Auf Lager",
+    "out_of_stock": "Nicht auf Lager",
+    "available": "verfügbar",
+    "reviews": "Bewertungen",
+    "save": "Sparen",
+    "description": "Beschreibung",
+    "specifications": "Spezifikationen",
+    "back_to_products": "Zurück zu Produkten",
+    "not_found": "Produkt nicht gefunden",
+    "all_products": "Alle Produkte",
+    "sort_by": "Sortieren nach",
+    "price_low_high": "Preis: Niedrig zu Hoch",
+    "price_high_low": "Preis: Hoch zu Niedrig",
+    "top_rated": "Bestbewertet"
+  },
+  "cart": {
+    "title": "Warenkorb",
+    "empty": "Ihr Warenkorb ist leer",
+    "continue_shopping": "Weiter Einkaufen",
+    "remove": "Entfernen",
+    "subtotal": "Zwischensumme",
+    "tax": "Geschätzte Steuer",
+    "shipping": "Versand",
+    "free": "Kostenlos",
+    "total": "Gesamt",
+    "email_label": "E-Mail (für Bestellbestätigung)",
+    "email_placeholder": "E-Mail eingeben",
+    "checkout": "Zur Kasse",
+    "processing": "Wird bearbeitet...",
+    "secure_checkout": "Sichere Zahlung mit Stripe"
+  },
+  "success": {
+    "title": "Bestellung Bestätigt!",
+    "message": "Vielen Dank für Ihren Einkauf. Eine Bestätigungs-E-Mail wurde gesendet.",
+    "continue": "Weiter Einkaufen"
+  },
+  "footer": {
+    "rights": "Alle Rechte vorbehalten."
+  }
+}

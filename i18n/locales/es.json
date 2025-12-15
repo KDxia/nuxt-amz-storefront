@@ -1,0 +1,68 @@
+{
+  "common": {
+    "home": "Inicio",
+    "products": "Productos",
+    "cart": "Carrito",
+    "search": "Buscar",
+    "language": "Idioma",
+    "store_name": "Tienda AMZ"
+  },
+  "home": {
+    "hero_title": "Productos Premium a Excelentes Precios",
+    "hero_subtitle": "Descubre nuestra selección de productos mejor valorados de Amazon",
+    "shop_now": "Comprar Ahora",
+    "featured_products": "Productos Destacados",
+    "quality_title": "Calidad Garantizada",
+    "quality_desc": "Todos los productos son cuidadosamente seleccionados y verificados",
+    "shipping_title": "Envío Rápido",
+    "shipping_desc": "Entrega rápida a tu puerta",
+    "secure_title": "Pago Seguro",
+    "secure_desc": "Tu información de pago siempre está protegida"
+  },
+  "products_data": {
+    "wireless-earbuds-pro": "Auriculares Inalámbricos Pro",
+    "smart-fitness-watch": "Reloj Fitness Inteligente"
+  },
+  "product": {
+    "add_to_cart": "Añadir al Carrito",
+    "adding": "Añadiendo...",
+    "in_stock": "En Stock",
+    "out_of_stock": "Agotado",
+    "available": "disponibles",
+    "reviews": "reseñas",
+    "save": "Ahorra",
+    "description": "Descripción",
+    "specifications": "Especificaciones",
+    "back_to_products": "Volver a Productos",
+    "not_found": "Producto No Encontrado",
+    "all_products": "Todos los Productos",
+    "sort_by": "Ordenar por",
+    "price_low_high": "Precio: Menor a Mayor",
+    "price_high_low": "Precio: Mayor a Menor",
+    "top_rated": "Mejor Valorados"
+  },
+  "cart": {
+    "title": "Carrito de Compras",
+    "empty": "Tu carrito está vacío",
+    "continue_shopping": "Continuar Comprando",
+    "remove": "Eliminar",
+    "subtotal": "Subtotal",
+    "tax": "Impuesto Estimado",
+    "shipping": "Envío",
+    "free": "Gratis",
+    "total": "Total",
+    "email_label": "Email (para confirmación del pedido)",
+    "email_placeholder": "Ingrese su email",
+    "checkout": "Proceder al Pago",
+    "processing": "Procesando...",
+    "secure_checkout": "Pago seguro con Stripe"
+  },
+  "success": {
+    "title": "¡Pedido Confirmado!",
+    "message": "Gracias por tu compra. Se ha enviado un email de confirmación.",
+    "continue": "Continuar Comprando"
+  },
+  "footer": {
+    "rights": "Todos los derechos reservados."
+  }
+}

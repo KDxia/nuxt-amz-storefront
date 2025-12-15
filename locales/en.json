@@ -1,0 +1,58 @@
+{
+  "common": {
+    "home": "Home",
+    "products": "Products",
+    "cart": "Cart",
+    "search": "Search",
+    "language": "Language"
+  },
+  "home": {
+    "hero_title": "Premium Products at Great Prices",
+    "hero_subtitle": "Discover our curated selection of top-rated Amazon products",
+    "shop_now": "Shop Now",
+    "featured_products": "Featured Products",
+    "quality_title": "Quality Guaranteed",
+    "quality_desc": "All products are carefully selected and verified",
+    "shipping_title": "Fast Shipping",
+    "shipping_desc": "Quick delivery to your doorstep",
+    "secure_title": "Secure Payment",
+    "secure_desc": "Your payment information is always protected"
+  },
+  "product": {
+    "add_to_cart": "Add to Cart",
+    "adding": "Adding...",
+    "in_stock": "In Stock",
+    "out_of_stock": "Out of Stock",
+    "available": "available",
+    "reviews": "reviews",
+    "save": "Save",
+    "description": "Description",
+    "specifications": "Specifications",
+    "back_to_products": "Back to Products",
+    "not_found": "Product Not Found"
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty",
+    "continue_shopping": "Continue Shopping",
+    "remove": "Remove",
+    "subtotal": "Subtotal",
+    "tax": "Estimated Tax",
+    "shipping": "Shipping",
+    "free": "Free",
+    "total": "Total",
+    "email_label": "Email (for order confirmation)",
+    "email_placeholder": "your@email.com",
+    "checkout": "Proceed to Checkout",
+    "processing": "Processing...",
+    "secure_checkout": "Secure checkout powered by Stripe"
+  },
+  "success": {
+    "title": "Order Confirmed!",
+    "message": "Thank you for your purchase. A confirmation email has been sent.",
+    "continue": "Continue Shopping"
+  },
+  "footer": {
+    "rights": "All rights reserved."
+  }
+}
