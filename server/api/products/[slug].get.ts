@@ -4,9 +4,23 @@
  */
 import { getStock } from '../../utils/inventory'
 
-// Static product data
-const staticProducts: Record<string, any> = {
-  'wireless-earbuds-pro': {
+interface Product {
+  id: string
+  slug: string
+  title: string
+  price: number
+  originalPrice?: number
+  images: string[]
+  category: string
+  rating: number
+  reviewCount: number
+  description?: string
+  featured: boolean
+}
+
+// Default products (fallback)
+const defaultProducts: Product[] = [
+  {
     id: 'prod_001',
     slug: 'wireless-earbuds-pro',
     title: 'Wireless Earbuds Pro',
@@ -19,7 +33,7 @@ const staticProducts: Record<string, any> = {
     featured: true,
     description: 'Experience premium sound quality with our Wireless Earbuds Pro.'
   },
-  'smart-fitness-watch': {
+  {
     id: 'prod_002',
     slug: 'smart-fitness-watch',
     title: 'Smart Fitness Watch',
@@ -32,7 +46,7 @@ const staticProducts: Record<string, any> = {
     featured: true,
     description: 'Track your fitness journey with our Smart Fitness Watch.'
   }
-}
+]
 
 export default defineEventHandler(async (event) => {
   const slug = getRouterParam(event, 'slug')
@@ -44,7 +58,11 @@ export default defineEventHandler(async (event) => {
     })
   }
   
-  const product = staticProducts[slug]
+  // Get products from storage or use defaults
+  const kv = await useStorage('data')
+  const products: Product[] = (await kv.getItem('products') as Product[] | null) || defaultProducts
+  
+  const product = products.find(p => p.slug === slug)
   
   if (!product) {
     throw createError({

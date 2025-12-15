@@ -1,7 +1,7 @@
 <template>
   <div class="min-h-screen bg-gray-100 py-8">
-    <div class="max-w-4xl mx-auto px-4">
-      <h1 class="text-3xl font-bold text-gray-900 mb-8">库存管理</h1>
+    <div class="max-w-6xl mx-auto px-4">
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">商品管理后台</h1>
       
       <!-- Login -->
       <div v-if="!isLoggedIn" class="bg-white rounded-lg shadow p-6">
@@ -11,113 +11,199 @@
             v-model="adminKey" 
             type="password" 
             placeholder="输入管理密钥"
-            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            class="flex-1 px-4 py-2 border border-gray-300 rounded-lg"
             @keyup.enter="login"
           />
-          <button 
-            @click="login"
-            class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
+          <button @click="login" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
             登录
           </button>
         </div>
         <p v-if="loginError" class="text-red-500 mt-2">{{ loginError }}</p>
       </div>
       
-      <!-- Inventory Table -->
-      <div v-else class="bg-white rounded-lg shadow overflow-hidden">
-        <div class="p-4 border-b flex justify-between items-center">
-          <h2 class="text-xl font-semibold">商品库存</h2>
+      <!-- Admin Panel -->
+      <div v-else>
+        <div class="flex justify-between items-center mb-6">
+          <button @click="showAddForm = true" class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">
+            + 添加商品
+          </button>
           <button @click="logout" class="text-gray-500 hover:text-gray-700">退出登录</button>
         </div>
         
-        <div v-if="loading" class="p-8 text-center">
-          <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+        <!-- Add/Edit Form Modal -->
+        <div v-if="showAddForm || editingProduct" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-semibold mb-4">{{ editingProduct ? '编辑商品' : '添加商品' }}</h2>
+            
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">商品ID *</label>
+                <input v-model="form.id" type="text" :disabled="!!editingProduct" class="w-full px-3 py-2 border rounded-lg disabled:bg-gray-100" placeholder="prod_003" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Slug *</label>
+                <input v-model="form.slug" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="product-name" />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">商品名称 *</label>
+                <input v-model="form.title" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="商品名称" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">价格 *</label>
+                <input v-model.number="form.price" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">原价</label>
+                <input v-model.number="form.originalPrice" type="number" step="0.01" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">库存</label>
+                <input v-model.number="form.stock" type="number" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">分类</label>
+                <input v-model="form.category" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="electronics" />
+              </div>
+              <div class="col-span-2">
+                <label class="block text-sm font-medium text-gray-700 mb-1">图片URL (每行一个)</label>
+                <textarea v-model="form.imagesText" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="https://example.com/image1.jpg"></textarea>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">评分</label>
+                <input v-model.number="form.rating" type="number" step="0.1" min="0" max="5" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">评价数</label>
+                <input v-model.number="form.reviewCount" type="number" class="w-full px-3 py-2 border rounded-lg" />
+              </div>
+              <div class="col-span-2">
+                <label class="flex items-center">
+                  <input v-model="form.featured" type="checkbox" class="mr-2" />
+                  <span class="text-sm font-medium text-gray-700">精选商品 (显示在首页)</span>
+                </label>
+              </div>
+            </div>
+            
+            <div class="flex justify-end gap-4 mt-6">
+              <button @click="cancelForm" class="px-4 py-2 border rounded-lg hover:bg-gray-50">取消</button>
+              <button @click="saveProduct" :disabled="saving" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400">
+                {{ saving ? '保存中...' : '保存' }}
+              </button>
+            </div>
+          </div>
         </div>
         
-        <table v-else class="w-full">
-          <thead class="bg-gray-50">
-            <tr>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">商品ID</th>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">商品名称</th>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">价格</th>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">库存</th>
-              <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">操作</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-200">
-            <tr v-for="product in products" :key="product.id">
-              <td class="px-6 py-4 text-sm text-gray-500">{{ product.id }}</td>
-              <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ product.title }}</td>
-              <td class="px-6 py-4 text-sm text-gray-500">${{ product.price }}</td>
-              <td class="px-6 py-4">
-                <input 
-                  v-model.number="product.newStock"
-                  type="number"
-                  min="0"
-                  class="w-20 px-2 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                />
-              </td>
-              <td class="px-6 py-4">
-                <button 
-                  @click="updateStock(product)"
-                  :disabled="product.updating"
-                  class="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700 disabled:bg-gray-400"
-                >
-                  {{ product.updating ? '保存中...' : '保存' }}
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        
-        <div v-if="message" class="p-4 bg-green-50 text-green-700 border-t">
-          {{ message }}
+        <!-- Products Table -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div v-if="loading" class="p-8 text-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          </div>
+          
+          <table v-else class="w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">图片</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">商品名称</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">价格</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">库存</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">精选</th>
+                <th class="px-4 py-3 text-left text-sm font-medium text-gray-500">操作</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr v-for="product in products" :key="product.id">
+                <td class="px-4 py-3">
+                  <img :src="product.images?.[0]" class="w-12 h-12 object-cover rounded" />
+                </td>
+                <td class="px-4 py-3">
+                  <div class="font-medium text-gray-900">{{ product.title }}</div>
+                  <div class="text-sm text-gray-500">{{ product.id }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <div class="text-gray-900">${{ product.price }}</div>
+                  <div v-if="product.originalPrice" class="text-sm text-gray-500 line-through">${{ product.originalPrice }}</div>
+                </td>
+                <td class="px-4 py-3">
+                  <input 
+                    v-model.number="product.newStock"
+                    type="number"
+                    min="0"
+                    class="w-20 px-2 py-1 border rounded"
+                    @change="updateStock(product)"
+                  />
+                </td>
+                <td class="px-4 py-3">
+                  <span v-if="product.featured" class="text-green-600">✓</span>
+                  <span v-else class="text-gray-400">-</span>
+                </td>
+                <td class="px-4 py-3">
+                  <button @click="editProduct(product)" class="text-blue-600 hover:underline mr-3">编辑</button>
+                  <button @click="deleteProduct(product)" class="text-red-600 hover:underline">删除</button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+        
+        <div v-if="message" class="mt-4 p-4 bg-green-50 text-green-700 rounded-lg">{{ message }}</div>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  layout: false
-})
+definePageMeta({ layout: false })
+
+interface Product {
+  id: string
+  slug: string
+  title: string
+  price: number
+  originalPrice?: number
+  images: string[]
+  category: string
+  rating: number
+  reviewCount: number
+  featured: boolean
+  stock?: number
+  newStock?: number
+}
 
 const adminKey = ref('')
 const isLoggedIn = ref(false)
 const loginError = ref('')
 const loading = ref(false)
+const saving = ref(false)
 const message = ref('')
-const products = ref<Array<{
-  id: string
-  slug: string
-  title: string
-  price: number
-  stock: number
-  newStock: number
-  updating: boolean
-}>>([])
+const products = ref<Product[]>([])
+const showAddForm = ref(false)
+const editingProduct = ref<Product | null>(null)
+
+const form = reactive({
+  id: '',
+  slug: '',
+  title: '',
+  price: 0,
+  originalPrice: 0,
+  stock: 100,
+  category: 'electronics',
+  imagesText: '',
+  rating: 4.5,
+  reviewCount: 0,
+  featured: false
+})
 
 const login = async () => {
   loginError.value = ''
   loading.value = true
-  
   try {
-    const data = await $fetch('/api/admin/inventory', {
+    const data = await $fetch('/api/admin/products', {
       headers: { 'x-admin-key': adminKey.value }
     })
-    
-    products.value = (data as any[]).map(p => ({
-      ...p,
-      newStock: p.stock,
-      updating: false
-    }))
+    products.value = (data as Product[]).map(p => ({ ...p, newStock: p.stock }))
     isLoggedIn.value = true
-    
-    // Save key to session
     sessionStorage.setItem('adminKey', adminKey.value)
-  } catch (error: any) {
+  } catch {
     loginError.value = '密钥错误'
   } finally {
     loading.value = false
@@ -131,30 +217,108 @@ const logout = () => {
   sessionStorage.removeItem('adminKey')
 }
 
-const updateStock = async (product: any) => {
-  product.updating = true
-  message.value = ''
+const resetForm = () => {
+  form.id = ''
+  form.slug = ''
+  form.title = ''
+  form.price = 0
+  form.originalPrice = 0
+  form.stock = 100
+  form.category = 'electronics'
+  form.imagesText = ''
+  form.rating = 4.5
+  form.reviewCount = 0
+  form.featured = false
+}
+
+const cancelForm = () => {
+  showAddForm.value = false
+  editingProduct.value = null
+  resetForm()
+}
+
+const editProduct = (product: Product) => {
+  editingProduct.value = product
+  form.id = product.id
+  form.slug = product.slug
+  form.title = product.title
+  form.price = product.price
+  form.originalPrice = product.originalPrice || 0
+  form.stock = product.stock || 100
+  form.category = product.category
+  form.imagesText = product.images?.join('\n') || ''
+  form.rating = product.rating
+  form.reviewCount = product.reviewCount
+  form.featured = product.featured
+}
+
+const saveProduct = async () => {
+  if (!form.id || !form.slug || !form.title || !form.price) {
+    message.value = '请填写必填字段'
+    return
+  }
   
+  saving.value = true
+  try {
+    const product: Product = {
+      id: form.id,
+      slug: form.slug,
+      title: form.title,
+      price: form.price,
+      originalPrice: form.originalPrice || undefined,
+      images: form.imagesText.split('\n').filter(s => s.trim()),
+      category: form.category,
+      rating: form.rating,
+      reviewCount: form.reviewCount,
+      featured: form.featured
+    }
+    
+    await $fetch('/api/admin/products', {
+      method: 'POST',
+      headers: { 'x-admin-key': adminKey.value },
+      body: { product, stock: form.stock }
+    })
+    
+    message.value = editingProduct.value ? '商品已更新' : '商品已添加'
+    cancelForm()
+    await login() // Refresh list
+  } catch {
+    message.value = '保存失败'
+  } finally {
+    saving.value = false
+  }
+}
+
+const updateStock = async (product: Product) => {
   try {
     await $fetch('/api/admin/inventory', {
       method: 'POST',
       headers: { 'x-admin-key': adminKey.value },
-      body: {
-        productId: product.id,
-        quantity: product.newStock
-      }
+      body: { productId: product.id, quantity: product.newStock }
     })
-    
     product.stock = product.newStock
     message.value = `${product.title} 库存已更新为 ${product.newStock}`
-  } catch (error) {
-    message.value = '更新失败'
-  } finally {
-    product.updating = false
+  } catch {
+    message.value = '更新库存失败'
   }
 }
 
-// Check for saved session
+const deleteProduct = async (product: Product) => {
+  if (!confirm(`确定删除 "${product.title}" 吗？`)) return
+  
+  try {
+    await $fetch('/api/admin/products', {
+      method: 'DELETE',
+      headers: { 'x-admin-key': adminKey.value },
+      body: { productId: product.id }
+    })
+    message.value = '商品已删除'
+    await login() // Refresh list
+  } catch {
+    message.value = '删除失败'
+  }
+}
+
 onMounted(() => {
   const savedKey = sessionStorage.getItem('adminKey')
   if (savedKey) {

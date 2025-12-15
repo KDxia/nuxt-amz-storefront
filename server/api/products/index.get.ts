@@ -4,8 +4,21 @@
  */
 import { getMultipleStock } from '../../utils/inventory'
 
-// Static product data (loaded from Markdown files at build time)
-const staticProducts = [
+interface Product {
+  id: string
+  slug: string
+  title: string
+  price: number
+  originalPrice?: number
+  images: string[]
+  category: string
+  rating: number
+  reviewCount: number
+  featured: boolean
+}
+
+// Default products (fallback)
+const defaultProducts: Product[] = [
   {
     id: 'prod_001',
     slug: 'wireless-earbuds-pro',
@@ -16,8 +29,7 @@ const staticProducts = [
     category: 'electronics',
     rating: 4.5,
     reviewCount: 1250,
-    featured: true,
-    inStock: true
+    featured: true
   },
   {
     id: 'prod_002',
@@ -29,15 +41,16 @@ const staticProducts = [
     category: 'electronics',
     rating: 4.7,
     reviewCount: 3420,
-    featured: true,
-    inStock: true
+    featured: true
   }
 ]
 
 export default defineEventHandler(async (event) => {
   const query = getQuery(event)
   
-  let products = [...staticProducts]
+  // Get products from storage or use defaults
+  const kv = await useStorage('data')
+  let products: Product[] = (await kv.getItem('products') as Product[] | null) || defaultProducts
   
   // Filter by category
   if (query.category) {
