@@ -1,6 +1,6 @@
 <template>
   <NuxtLink 
-    :to="localePath(`/products/${encodeURI(product.slug)}`)" 
+    :to="localePath({ path: `/products/${encodeSlugForPath(product.slug)}`, query: { id: product.id } })" 
     class="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
   >
     <!-- Product Image -->
@@ -64,4 +64,6 @@ defineProps<{
 }>()
 
 const localePath = useLocalePath()
+
+const encodeSlugForPath = (slug: string) => slug.split('/').map(encodeURIComponent).join('/')
 </script>

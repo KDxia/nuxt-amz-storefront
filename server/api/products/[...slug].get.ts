@@ -10,9 +10,9 @@ export default defineEventHandler(async (event) => {
   setHeader(event, 'Cache-Control', 'no-store')
 
   const raw = (event.context.params as Record<string, unknown> | undefined)?.slug
-  const slug = Array.isArray(raw) ? raw.join('/') : (raw as string | undefined)
+  const slugRaw = Array.isArray(raw) ? raw.join('/') : (raw as string | undefined)
 
-  if (!slug) {
+  if (!slugRaw) {
     throw createError({
       statusCode: 400,
       statusMessage: 'Product slug is required'
@@ -22,7 +22,32 @@ export default defineEventHandler(async (event) => {
   // IMPORTANT: Use the same source of truth as admin (Vercel KV)
   const products: Product[] = await getProducts()
 
-  const product = products.find(p => p.slug === slug)
+  const safeDecode = (s: string) => {
+    try {
+      return decodeURIComponent(s)
+    } catch {
+      return s
+    }
+  }
+
+  const slugDecoded = slugRaw
+    .split('/')
+    .map(seg => (seg.includes('%') ? safeDecode(seg) : seg))
+    .join('/')
+
+  const slugWholeDecoded = slugRaw.includes('%') ? safeDecode(slugRaw) : slugRaw
+
+  const candidates = [slugRaw, slugDecoded, slugWholeDecoded]
+    .map(s => s.trim())
+    .filter(Boolean)
+
+  const query = getQuery(event)
+  const id = typeof query.id === 'string' ? query.id : undefined
+
+  const product = products.find(p => {
+    const ps = String(p.slug || '').trim()
+    return candidates.includes(ps)
+  }) || (id ? products.find(p => p.id === id) : undefined)
 
   if (!product) {
     throw createError({

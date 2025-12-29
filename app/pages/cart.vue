@@ -34,7 +34,7 @@
           
           <div class="flex-grow">
             <NuxtLink 
-              :to="localePath(`/products/${item.product?.slug}`)"
+              :to="localePath({ path: `/products/${encodeSlugForPath(item.product?.slug || '')}`, query: { id: item.productId } })"
               class="font-semibold text-gray-900 hover:text-blue-600 line-clamp-2"
             >
               {{ item.product?.title || 'Loading...' }}
@@ -136,6 +136,8 @@
 <script setup lang="ts">
 const localePath = useLocalePath()
 const { cart, loading, updateQuantity, removeFromCart, checkout } = useCart()
+
+const encodeSlugForPath = (slug: string) => slug.split('/').map(encodeURIComponent).join('/')
 const { trackBeginCheckout } = useAnalytics()
 
 const email = ref('')

@@ -111,8 +111,13 @@ const route = useRoute()
 
 const slugParam = route.params.slug as string | string[]
 const slug = Array.isArray(slugParam) ? slugParam.join('/') : slugParam
+const id = typeof route.query.id === 'string' ? route.query.id : undefined
 
-const { data: product, pending, error } = await useFetch(`/api/products/${encodeURI(slug)}`)
+const encodeSlugForPath = (s: string) => s.split('/').map(encodeURIComponent).join('/')
+
+const { data: product, pending, error } = await useFetch(`/api/products/${encodeSlugForPath(slug)}`, {
+  query: id ? { id } : undefined
+})
 
 const selectedImage = ref(product.value?.images?.[0] || '')
 const quantity = ref(1)
