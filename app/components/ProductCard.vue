@@ -1,6 +1,6 @@
 <template>
   <NuxtLink 
-    :to="localePath(`/products/${product.slug}`)" 
+    :to="localePath(`/products/${encodeURI(product.slug)}`)" 
     class="group bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
   >
     <!-- Product Image -->

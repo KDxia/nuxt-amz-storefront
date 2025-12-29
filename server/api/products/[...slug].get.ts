@@ -1,15 +1,16 @@
 /**
- * Get single product by slug
+ * Get single product by slug (supports slashes and special characters)
  * GET /api/products/:slug
  */
 import { getStock } from '../../utils/inventory'
 import { getProducts, type Product } from '../../utils/products'
 
 export default defineEventHandler(async (event) => {
-  const slug = getRouterParam(event, 'slug')
-
   // Avoid serving stale data via intermediary caches
   setHeader(event, 'Cache-Control', 'no-store')
+
+  const raw = (event.context.params as Record<string, unknown> | undefined)?.slug
+  const slug = Array.isArray(raw) ? raw.join('/') : (raw as string | undefined)
 
   if (!slug) {
     throw createError({

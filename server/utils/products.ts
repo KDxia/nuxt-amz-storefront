@@ -64,6 +64,24 @@ const defaultProducts: Product[] = [
 /**
  * Get all products from KV
  */
+export function normalizeSlug(input: string): string {
+  return input
+    .trim()
+    .toLowerCase()
+    // normalize common unicode dashes to '-'
+    .replace(/[‐‑‒–—―]/g, '-')
+    // treat separators as '-'
+    .replace(/[\s/]+/g, '-')
+    // replace '&' with 'and'
+    .replace(/&/g, 'and')
+    // drop any remaining characters that are not url-friendly
+    .replace(/[^a-z0-9-]/g, '-')
+    // collapse dashes
+    .replace(/-+/g, '-')
+    // trim dashes
+    .replace(/^-|-$/g, '')
+}
+
 export async function getProducts(): Promise<Product[]> {
   try {
     const kv = getKVClient()

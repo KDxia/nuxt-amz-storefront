@@ -108,9 +108,11 @@
 <script setup lang="ts">
 const localePath = useLocalePath()
 const route = useRoute()
-const slug = route.params.slug as string
 
-const { data: product, pending, error } = await useFetch(`/api/products/${slug}`)
+const slugParam = route.params.slug as string | string[]
+const slug = Array.isArray(slugParam) ? slugParam.join('/') : slugParam
+
+const { data: product, pending, error } = await useFetch(`/api/products/${encodeURI(slug)}`)
 
 const selectedImage = ref(product.value?.images?.[0] || '')
 const quantity = ref(1)

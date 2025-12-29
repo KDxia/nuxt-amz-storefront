@@ -3,7 +3,7 @@
  * POST /api/admin/products
  */
 import { setStock } from '../../utils/inventory'
-import { upsertProduct, type Product } from '../../utils/products'
+import { getProducts, upsertProduct, type Product } from '../../utils/products'
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -24,9 +24,17 @@ export default defineEventHandler(async (event) => {
     })
   }
   
+  // Keep slug as-is (allow special characters). Only trim and prevent duplicates.
+  product.slug = product.slug.trim()
+  const existing = await getProducts()
+  const conflict = existing.find(p => p.slug === product.slug && p.id !== product.id)
+  if (conflict) {
+    throw createError({ statusCode: 409, statusMessage: 'Slug already exists' })
+  }
+
   // Upsert product using Vercel KV
   const isNew = await upsertProduct(product)
-  
+
   // Set stock if provided
   if (stock !== undefined) {
     await setStock(product.id, stock)
