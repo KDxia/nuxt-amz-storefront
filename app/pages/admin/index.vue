@@ -87,7 +87,7 @@
                   </button>
                 </div>
                 <p v-if="uploadError" class="mt-1 text-sm text-red-600 whitespace-pre-line">{{ uploadError }}</p>
-                <p class="mt-1 text-xs text-gray-500">上传会保存到 Vercel Blob,并自动把图片URL追加到上面的列表（每行一个）。<br>单张图片最大 10MB。</p>
+                <p class="mt-1 text-xs text-gray-500">上传会保存到 Vercel Blob,并自动把图片URL追加到上面的列表（每行一个）。<br>单张图片最大 10MB（前端直传，无需后端中转）。</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">评分</label>
@@ -288,7 +288,7 @@ const uploadSelectedImages = async (e: Event) => {
     return
   }
 
-  // 检查每张图片大小(10MB = 10 * 1024 * 1024 bytes)
+  // 检查每张图片大小 (10MB limit)
   const maxSize = 10 * 1024 * 1024
   const oversized: string[] = []
   
@@ -306,22 +306,36 @@ const uploadSelectedImages = async (e: Event) => {
   }
 
   uploading.value = true
+  
   try {
-    const fd = new FormData()
+    // 1. Get upload token from backend
+    const tokenRes = await $fetch('/api/admin/upload-token', {
+      method: 'POST',
+      headers: { 'x-admin-key': adminKey.value }
+    })
+    const token = (tokenRes as any)?.token
+    if (!token) throw new Error('无法获取上传令牌')
+
+    // 2. Upload directly to Vercel Blob (client-side, bypass 4.5MB function limit)
+    const { put } = await import('@vercel/blob')
+    const uploadedUrls: string[] = []
+
     for (const file of Array.from(input.files)) {
-      fd.append('files', file)
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const pathname = `products/${Date.now()}-${Math.random().toString(36).slice(2)}-${safeName}`
+      
+      const blob = await put(pathname, file, {
+        access: 'public',
+        token
+      })
+      
+      uploadedUrls.push(blob.url)
     }
 
-    const res = await $fetch('/api/admin/upload', {
-      method: 'POST',
-      headers: { 'x-admin-key': adminKey.value },
-      body: fd
-    })
-
-    const urls: string[] = ((res as any)?.files || []).map((f: any) => f?.url).filter(Boolean)
-    if (urls.length > 0) {
+    // 3. Append URLs to textarea
+    if (uploadedUrls.length > 0) {
       const current = form.imagesText.trim()
-      form.imagesText = current ? `${current}\n${urls.join('\n')}` : urls.join('\n')
+      form.imagesText = current ? `${current}\n${uploadedUrls.join('\n')}` : uploadedUrls.join('\n')
     }
   } catch (err: any) {
     uploadError.value = err?.data?.statusMessage || err?.message || '上传失败'
