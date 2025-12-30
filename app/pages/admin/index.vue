@@ -65,8 +65,29 @@
                 <input v-model="form.category" type="text" class="w-full px-3 py-2 border rounded-lg" placeholder="electronics" />
               </div>
               <div class="col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">图片URL (每行一个)</label>
+                <label class="block text-sm font-medium text-gray-700 mb-1">商品图片 (支持粘贴URL / 上传文件)</label>
                 <textarea v-model="form.imagesText" rows="3" class="w-full px-3 py-2 border rounded-lg" placeholder="https://example.com/image1.jpg"></textarea>
+
+                <div class="mt-2 flex items-center gap-3">
+                  <input
+                    ref="imageInput"
+                    type="file"
+                    accept="image/*"
+                    multiple
+                    class="block w-full text-sm text-gray-700"
+                    @change="uploadSelectedImages"
+                  />
+                  <button
+                    type="button"
+                    class="px-3 py-2 border rounded-lg hover:bg-gray-50 disabled:bg-gray-100"
+                    :disabled="uploading"
+                    @click="imageInput?.click()"
+                  >
+                    {{ uploading ? '上传中...' : '选择图片' }}
+                  </button>
+                </div>
+                <p v-if="uploadError" class="mt-1 text-sm text-red-600">{{ uploadError }}</p>
+                <p class="mt-1 text-xs text-gray-500">上传会保存到 Vercel Blob，并自动把图片URL追加到上面的列表（每行一个）。</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">评分</label>
@@ -174,10 +195,15 @@ const isLoggedIn = ref(false)
 const loginError = ref('')
 const loading = ref(false)
 const saving = ref(false)
+const uploading = ref(false)
+const uploadError = ref('')
+const imageInput = ref<HTMLInputElement | null>(null)
+
 const message = ref('')
 const products = ref<Product[]>([])
 const showAddForm = ref(false)
 const editingProduct = ref<Product | null>(null)
+
 
 const form = reactive({
   id: '',
@@ -251,6 +277,43 @@ const editProduct = (product: Product) => {
   form.reviewCount = product.reviewCount
   form.featured = product.featured
 }
+
+const uploadSelectedImages = async (e: Event) => {
+  uploadError.value = ''
+  const input = e.target as HTMLInputElement
+  if (!input.files || input.files.length === 0) return
+
+  if (!adminKey.value) {
+    uploadError.value = '请先登录后台'
+    return
+  }
+
+  uploading.value = true
+  try {
+    const fd = new FormData()
+    for (const file of Array.from(input.files)) {
+      fd.append('files', file)
+    }
+
+    const res = await $fetch('/api/admin/upload', {
+      method: 'POST',
+      headers: { 'x-admin-key': adminKey.value },
+      body: fd
+    })
+
+    const urls: string[] = ((res as any)?.files || []).map((f: any) => f?.url).filter(Boolean)
+    if (urls.length > 0) {
+      const current = form.imagesText.trim()
+      form.imagesText = current ? `${current}\n${urls.join('\n')}` : urls.join('\n')
+    }
+  } catch (err: any) {
+    uploadError.value = err?.data?.statusMessage || err?.message || '上传失败'
+  } finally {
+    uploading.value = false
+    input.value = ''
+  }
+}
+
 
 const saveProduct = async () => {
   if (!form.id || !form.slug || !form.title || !form.price) {

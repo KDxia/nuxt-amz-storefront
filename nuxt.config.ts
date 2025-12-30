@@ -46,6 +46,7 @@ export default defineNuxtConfig({
     resendApiKey: process.env.RESEND_API_KEY,
     kvRestApiUrl: process.env.KV_REST_API_URL,
     kvRestApiToken: process.env.KV_REST_API_TOKEN,
+    blobReadWriteToken: process.env.BLOB_READ_WRITE_TOKEN,
     postgresUrl: process.env.POSTGRES_URL,
     taxjarApiKey: process.env.TAXJAR_API_KEY,
     adminKey: process.env.ADMIN_KEY || 'admin123',
