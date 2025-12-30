@@ -86,8 +86,8 @@
                     {{ uploading ? '上传中...' : '选择图片' }}
                   </button>
                 </div>
-                <p v-if="uploadError" class="mt-1 text-sm text-red-600">{{ uploadError }}</p>
-                <p class="mt-1 text-xs text-gray-500">上传会保存到 Vercel Blob，并自动把图片URL追加到上面的列表（每行一个）。</p>
+                <p v-if="uploadError" class="mt-1 text-sm text-red-600 whitespace-pre-line">{{ uploadError }}</p>
+                <p class="mt-1 text-xs text-gray-500">上传会保存到 Vercel Blob,并自动把图片URL追加到上面的列表（每行一个）。<br>单张图片最大 10MB。</p>
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">评分</label>
@@ -285,6 +285,23 @@ const uploadSelectedImages = async (e: Event) => {
 
   if (!adminKey.value) {
     uploadError.value = '请先登录后台'
+    return
+  }
+
+  // 检查每张图片大小(10MB = 10 * 1024 * 1024 bytes)
+  const maxSize = 10 * 1024 * 1024
+  const oversized: string[] = []
+  
+  for (const file of Array.from(input.files)) {
+    if (file.size > maxSize) {
+      const sizeMB = (file.size / 1024 / 1024).toFixed(2)
+      oversized.push(`${file.name} (${sizeMB}MB)`)
+    }
+  }
+
+  if (oversized.length > 0) {
+    uploadError.value = `以下图片超过 10MB 限制，请压缩后再上传:\n${oversized.join('\n')}`
+    input.value = ''
     return
   }
 

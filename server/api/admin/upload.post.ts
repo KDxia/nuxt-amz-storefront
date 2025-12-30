@@ -42,8 +42,8 @@ export default defineEventHandler(async (event) => {
     }
 
     // Vercel Functions have request size limits; keep this conservative.
-    if (part.data.length > 4 * 1024 * 1024) {
-      throw createError({ statusCode: 413, statusMessage: 'Image too large (max 4MB). Please compress before uploading.' })
+    if (part.data.length > 10 * 1024 * 1024) {
+      throw createError({ statusCode: 413, statusMessage: `图片 ${part.filename || 'unknown'} 太大 (超过 10MB)，请压缩后再上传。` })
     }
 
     const originalName = part.filename || 'image'
